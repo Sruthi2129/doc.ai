@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Corrector</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 320px;
+            background: #f5f5f5;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: #4a5cff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .app-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 35px 10px 35px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .clear-search {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .replace-box {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .replace-input {
+            width: 100%;
+            padding: 10px 15px 10px 35px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .replace-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .replace-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #f0f0f0;
+        }
+
+        .section-header {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+
+        .toc-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .toc-item {
+            padding: 10px 12px;
+            margin-bottom: 6px;
+            background: white;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .toc-item:hover {
+            border-color: #4a5cff;
+            background: #f0f5ff;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 30px;
+            background: #f9f9f9;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .doc-title {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .top-bar-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .editor-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .editor {
+            flex: 1;
+            padding: 40px 60px;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .editor-content {
+            max-width: 800px;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .editor-content h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            margin-top: 30px;
+            color: #000;
+            font-weight: 600;
+            scroll-margin-top: 20px;
+        }
+
+        .editor-content h2:first-child {
+            margin-top: 0;
+        }
+
+        .editor-content p {
+            margin-bottom: 20px;
+            font-size: 15px;
+            text-align: justify;
+        }
+
+        .highlight {
+            background: yellow;
+            padding: 2px 0;
+        }
+
+        .error-word {
+            color: #ff4444;
+            text-decoration: underline;
+            text-decoration-style: wavy;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .suggestion-word {
+            color: #4a5cff;
+            text-decoration: underline;
+            text-decoration-style: wavy;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .right-sidebar {
+            width: 380px;
+            background: #fafafa;
+            border-left: 1px solid #ddd;
+            padding: 25px;
+            overflow-y: auto;
+        }
+
+        .suggestions-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 25px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .stat-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .all-dot {
+            background: #4a5cff;
+        }
+
+        .spelling-dot {
+            background: #ff4444;
+        }
+
+        .grammar-dot {
+            background: #00cc88;
+        }
+
+        .suggestions-section {
+            border-top: 2px solid #ddd;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+
+        .suggestions-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .bulk-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .bulk-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .bulk-btn.accept-all {
+            background: #4a5cff;
+            color: white;
+            border-color: #4a5cff;
+        }
+
+        .bulk-btn.accept-all:hover {
+            background: #3a4cef;
+        }
+
+        .bulk-btn.reject-all:hover {
+            background: #f0f0f0;
+        }
+
+        .suggestion-card {
+            background: white;
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 18px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .suggestion-card.removing {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+
+        .suggestion-type {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .suggestion-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .format-badge {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .grammar-badge {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .spelling-badge {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .suggestion-text {
+            font-size: 14px;
+            color: #4a5cff;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .suggestion-description {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .suggestion-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .suggestion-option {
+            padding: 8px 16px;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .suggestion-option:hover {
+            background: #e8e8e8;
+            border-color: #4a5cff;
+        }
+
+        .suggestion-option.selected {
+            background: #e8f5e9;
+            border-color: #00cc88;
+        }
+
+        .suggestion-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .accept-btn {
+            flex: 1;
+            padding: 10px;
+            background: #4a5cff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .accept-btn:hover {
+            background: #3a4cef;
+        }
+
+        .ignore-btn {
+            flex: 1;
+            padding: 10px;
+            background: white;
+            color: #666;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .ignore-btn:hover {
+            background: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="header">
+            <div class="logo">📝</div>
+            <div class="app-title">Document Corrector</div>
+        </div>
+
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="searchInput" placeholder="Find...">
+            <button class="clear-search" id="clearSearch">×</button>
+        </div>
+
+        <div class="replace-box">
+            <span class="replace-icon">→</span>
+            <input type="text" class="replace-input" id="replaceInput" placeholder="Replace with...">
+        </div>
+
+        <div class="replace-buttons">
+            <button class="btn" id="replaceBtn">Replace</button>
+            <button class="btn" id="replaceAllBtn">Replace all</button>
+        </div>
+
+        <div class="section-header">Table of Contents</div>
+
+        <div class="toc-list" id="tocList">
+            <!-- Table of contents will be generated here -->
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="doc-title" id="docTitle">What is Lorem Ipsum?</div>
+            <div class="top-bar-buttons">
+                <button class="icon-btn" id="undoBtn">↶ Undo</button>
+                <button class="icon-btn" id="redoBtn">↷ Redo</button>
+                <button class="icon-btn" id="downloadBtn">⬇ Download</button>
+                <button class="icon-btn" id="previewBtn">▶ Preview</button>
+            </div>
+        </div>
+
+        <div class="editor-container">
+            <div class="editor">
+                <div class="editor-content" id="editorContent" contenteditable="true">
+                    <h2 id="section-1">What is Lorem Ipsum?</h2>
+                    <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the <span class="error-word" data-original="recieve" data-suggestion="receive" data-error-type="spelling">recieve</span> industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but <span class="suggestion-word" data-original="email;" data-suggestion="email:" data-error-type="format">email;</span> the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker <span class="suggestion-word" data-original="it's cover" data-suggestion="its cover" data-error-type="grammar">it's cover</span> versions of Lorem Ipsum.</p>
+
+                    <h2 id="section-2">Why do we use it?</h2>
+                    <p>It is a <span class="suggestion-word" data-original="long established" data-suggestion="well-established" data-error-type="grammar">long established</span> fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more- or-less normal distribution of letters, as opposed to using <span class="error-word" data-original="recieve" data-suggestion="receive" data-error-type="spelling">recieve</span> here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use <span class="suggestion-word" data-original="it's cover" data-suggestion="its cover" data-error-type="grammar">it's cover</span> as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on <span class="error-word" data-original="recieve" data-suggestion="receive" data-error-type="spelling">recieve</span> purpose (injected <span class="error-word" data-original="humour" data-suggestion="humor" data-error-type="spelling">humour</span> and the like).</p>
+
+                    <h2 id="section-3">Where does it come from?</h2>
+                    <p>Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source.</p>
+                </div>
+            </div>
+
+            <div class="right-sidebar">
+                <div class="suggestions-header">AI Suggestions</div>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="statAll">7</div>
+                        <div class="stat-label">
+                            <span class="stat-dot all-dot"></span>
+                            All
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="statSpelling">4</div>
+                        <div class="stat-label">
+                            <span class="stat-dot spelling-dot"></span>
+                            Spelling
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="statGrammar">3</div>
+                        <div class="stat-label">
+                            <span class="stat-dot grammar-dot"></span>
+                            Grammar
+                        </div>
+                    </div>
+                </div>
+
+                <div class="suggestions-section">
+                    <div class="suggestions-title">Suggestions</div>
+
+                    <div class="bulk-actions">
+                        <button class="bulk-btn accept-all" id="acceptAllBtn">Accept All</button>
+                        <button class="bulk-btn reject-all" id="rejectAllBtn">Reject All</button>
+                    </div>
+
+                    <div id="suggestionsContainer">
+                        <!-- Suggestions will be dynamically loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let undoStack = [];
+        let redoStack = [];
+        let currentContent = '';
+        let suggestions = [];
+        let documentTitle = 'What is Lorem Ipsum?';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            const editorContent = document.getElementById('editorContent');
+            currentContent = editorContent.innerHTML;
+            saveState();
+            loadSuggestions();
+            generateTableOfContents();
+            updateDocumentTitle();
+
+            // Add event listeners for editor changes
+            editorContent.addEventListener('input', function() {
+                const newContent = this.innerHTML;
+                if (newContent !== currentContent) {
+                    saveState();
+                    currentContent = newContent;
+                    generateTableOfContents();
+                    updateDocumentTitle();
+                }
+            });
+        });
+
+        // Generate table of contents
+        function generateTableOfContents() {
+            const editorContent = document.getElementById('editorContent');
+            const headings = editorContent.querySelectorAll('h2');
+            const tocList = document.getElementById('tocList');
+
+            tocList.innerHTML = '';
+
+            headings.forEach((heading, index) => {
+                const tocItem = document.createElement('div');
+                tocItem.className = 'toc-item';
+                tocItem.textContent = heading.textContent;
+                tocItem.onclick = function() {
+                    heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                };
+                tocList.appendChild(tocItem);
+            });
+        }
+
+        // Update document title
+        function updateDocumentTitle() {
+            const editorContent = document.getElementById('editorContent');
+            const firstHeading = editorContent.querySelector('h2');
+
+            if (firstHeading) {
+                documentTitle = firstHeading.textContent;
+                document.getElementById('docTitle').textContent = documentTitle;
+            }
+        }
+
+        // Load suggestions from the document
+        function loadSuggestions() {
+            const editorContent = document.getElementById('editorContent');
+            const errorWords = editorContent.querySelectorAll('.error-word, .suggestion-word');
+            suggestions = [];
+
+            errorWords.forEach((word, index) => {
+                const errorType = word.getAttribute('data-error-type');
+                const original = word.getAttribute('data-original');
+                const suggestion = word.getAttribute('data-suggestion');
+
+                suggestions.push({
+                    index: index,
+                    element: word,
+                    type: errorType,
+                    original: original,
+                    suggestion: suggestion
+                });
+            });
+
+            renderSuggestions();
+        }
+
+        // Render suggestions in the right sidebar
+        function renderSuggestions() {
+            const container = document.getElementById('suggestionsContainer');
+            container.innerHTML = '';
+
+            if (suggestions.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">No suggestions available</div>';
+                return;
+            }
+
+            suggestions.forEach((sugg, idx) => {
+                const card = document.createElement('div');
+                card.className = 'suggestion-card';
+                card.dataset.index = idx;
+
+                let badgeClass = 'format-badge';
+                let badgeText = 'Format';
+
+                if (sugg.type === 'spelling') {
+                    badgeClass = 'spelling-badge';
+                    badgeText = 'Spelling';
+                } else if (sugg.type === 'grammar') {
+                    badgeClass = 'grammar-badge';
+                    badgeText = 'Grammar';
+                }
+
+                let optionsHTML = '';
+                if (sugg.type === 'grammar' || sugg.type === 'format') {
+                    optionsHTML = `
+                        <div class="suggestion-options">
+                            <div class="suggestion-option" onclick="selectOption(${idx}, '${sugg.original}')">${sugg.original}</div>
+                            <div class="suggestion-option selected" onclick="selectOption(${idx}, '${sugg.suggestion}')">${sugg.suggestion}</div>
+                        </div>
+                    `;
+                }
+
+                let description = '';
+                if (sugg.type === 'format') {
+                    description = `<div class="suggestion-description">Missing space after "${sugg.original}" in the text</div>`;
+                } else if (sugg.type === 'grammar') {
+                    description = `<div class="suggestion-text">${sugg.original}  →  ${sugg.suggestion}</div>`;
+                } else {
+                    description = `<div class="suggestion-description">Correct spelling: "${sugg.suggestion}"</div>`;
+                }
+
+                card.innerHTML = `
+                    <div class="suggestion-type">
+                        <span class="suggestion-badge ${badgeClass}">${badgeText}</span>
+                        ${sugg.original}
+                    </div>
+                    ${description}
+                    ${optionsHTML}
+                    <div class="suggestion-actions">
+                        <button class="accept-btn" onclick="acceptSuggestion(${idx})">Accept</button>
+                        <button class="ignore-btn" onclick="ignoreSuggestion(${idx})">Ignore</button>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+
+            updateStats();
+        }
+
+        // Accept suggestion
+        function acceptSuggestion(index) {
+            const sugg = suggestions[index];
+            if (!sugg) return;
+
+            saveState();
+
+            // Replace the text in the editor
+            const element = sugg.element;
+            if (element && element.parentNode) {
+                const textNode = document.createTextNode(sugg.suggestion);
+                element.parentNode.replaceChild(textNode, element);
+            }
+
+            // Update current content
+            currentContent = document.getElementById('editorContent').innerHTML;
+
+            // Remove the suggestion
+            removeSuggestionCard(index);
+        }
+
+        // Ignore suggestion
+        function ignoreSuggestion(index) {
+            removeSuggestionCard(index);
+        }
+
+        // Accept all suggestions
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('acceptAllBtn').addEventListener('click', function() {
+                acceptAllSuggestions();
+            });
+
+            document.getElementById('rejectAllBtn').addEventListener('click', function() {
+                rejectAllSuggestions();
+            });
+        });
+
+        function acceptAllSuggestions() {
+            if (suggestions.length === 0) return;
+
+            saveState();
+
+            // Accept all suggestions from last to first to avoid index issues
+            for (let i = suggestions.length - 1; i >= 0; i--) {
+                const sugg = suggestions[i];
+                if (sugg && sugg.element && sugg.element.parentNode) {
+                    const textNode = document.createTextNode(sugg.suggestion);
+                    sugg.element.parentNode.replaceChild(textNode, sugg.element);
+                }
+            }
+
+            // Update current content
+            currentContent = document.getElementById('editorContent').innerHTML;
+
+            // Clear all suggestions
+            suggestions = [];
+            renderSuggestions();
+        }
+
+        function rejectAllSuggestions() {
+            suggestions = [];
+            renderSuggestions();
+        }
+
+        // Remove suggestion card with animation
+        function removeSuggestionCard(index) {
+            const card = document.querySelector(`.suggestion-card[data-index="${index}"]`);
+            if (card) {
+                card.classList.add('removing');
+                setTimeout(() => {
+                    card.remove();
+                    suggestions.splice(index, 1);
+                    // Reindex remaining suggestions
+                    const remainingCards = document.querySelectorAll('.suggestion-card');
+                    remainingCards.forEach((c, i) => {
+                        c.dataset.index = i;
+                        const buttons = c.querySelectorAll('.accept-btn, .ignore-btn');
+                        buttons[0].setAttribute('onclick', `acceptSuggestion(${i})`);
+                        buttons[1].setAttribute('onclick', `ignoreSuggestion(${i})`);
+                    });
+                    updateStats();
+                }, 300);
+            }
+        }
+
+        // Select option
+        function selectOption(index, value) {
+            const sugg = suggestions[index];
+            if (sugg) {
+                sugg.suggestion = value;
+                // Update selected state
+                const card = document.querySelector(`.suggestion-card[data-index="${index}"]`);
+                if (card) {
+                    const options = card.querySelectorAll('.suggestion-option');
+                    options.forEach(opt => {
+                        opt.classList.remove('selected');
+                        if (opt.textContent === value) {
+                            opt.classList.add('selected');
+                        }
+                    });
+                }
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            const total = suggestions.length;
+            const spelling = suggestions.filter(s => s.type === 'spelling').length;
+            const grammar = suggestions.filter(s => s.type === 'grammar' || s.type === 'format').length;
+
+            document.getElementById('statAll').textContent = total;
+            document.getElementById('statSpelling').textContent = spelling;
+            document.getElementById('statGrammar').textContent = grammar;
+        }
+
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const clearSearch = document.getElementById('clearSearch');
+
+        searchInput.addEventListener('input', function() {
+            performSearch();
+        });
+
+        clearSearch.addEventListener('click', function() {
+            searchInput.value = '';
+            performSearch();
+        });
+
+        function performSearch() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const editorContent = document.getElementById('editorContent');
+
+            if (searchTerm === '') {
+                editorContent.innerHTML = currentContent;
+                return;
+            }
+
+            highlightMatches(searchTerm);
+        }
+
+        function highlightMatches(searchTerm) {
+            const editorContent = document.getElementById('editorContent');
+            const innerHTML = currentContent;
+
+            const temp = document.createElement('div');
+            temp.innerHTML = innerHTML;
+
+            const walker = document.createTreeWalker(
+                temp,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+
+            let textNodes = [];
+            let node;
+            while (node = walker.nextNode()) {
+                textNodes.push(node);
+            }
+
+            textNodes.forEach(textNode => {
+                const text = textNode.textContent;
+                const regex = new RegExp(`(${escapeRegex(searchTerm)})`, 'gi');
+
+                if (regex.test(text)) {
+                    const span = document.createElement('span');
+                    span.innerHTML = text.replace(regex, '<span class="highlight">$1</span>');
+                    textNode.parentNode.replaceChild(span, textNode);
+                }
+            });
+
+            editorContent.innerHTML = temp.innerHTML;
+        }
+
+        function escapeRegex(str) {
+            return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        // Replace functionality
+        document.getElementById('replaceBtn').addEventListener('click', function() {
+            replaceNext();
+        });
+
+        document.getElementById('replaceAllBtn').addEventListener('click', function() {
+            replaceAll();
+        });
+
+        function replaceNext() {
+            const searchTerm = searchInput.value;
+            const replaceTerm = document.getElementById('replaceInput').value;
+
+            if (!searchTerm) return;
+
+            saveState();
+            const editorContent = document.getElementById('editorContent');
+            const text = editorContent.textContent;
+            const index = text.toLowerCase().indexOf(searchTerm.toLowerCase());
+
+            if (index !== -1) {
+                currentContent = currentContent.replace(new RegExp(escapeRegex(searchTerm), 'i'), replaceTerm);
+                editorContent.innerHTML = currentContent;
+                performSearch();
+            }
+        }
+
+        function replaceAll() {
+            const searchTerm = searchInput.value;
+            const replaceTerm = document.getElementById('replaceInput').value;
+
+            if (!searchTerm) return;
+
+            saveState();
+            const editorContent = document.getElementById('editorContent');
+            currentContent = currentContent.replace(new RegExp(escapeRegex(searchTerm), 'gi'), replaceTerm);
+            editorContent.innerHTML = currentContent;
+            performSearch();
+        }
+
+        // Undo/Redo functionality
+        document.getElementById('undoBtn').addEventListener('click', function() {
+            undo();
+        });
+
+        document.getElementById('redoBtn').addEventListener('click', function() {
+            redo();
+        });
+
+        function saveState() {
+            undoStack.push(currentContent);
+            redoStack = [];
+            if (undoStack.length > 50) {
+                undoStack.shift();
+            }
+        }
+
+        function undo() {
+            if (undoStack.length > 1) {
+                const currentState = undoStack.pop();
+                redoStack.push(currentState);
+                currentContent = undoStack[undoStack.length - 1];
+                document.getElementById('editorContent').innerHTML = currentContent;
+                loadSuggestions();
+                generateTableOfContents();
+                updateDocumentTitle();
+            }
+        }
+
+        function redo() {
+            if (redoStack.length > 0) {
+                const state = redoStack.pop();
+                undoStack.push(state);
+                currentContent = state;
+                document.getElementById('editorContent').innerHTML = currentContent;
+                loadSuggestions();
+                generateTableOfContents();
+                updateDocumentTitle();
+            }
+        }
+
+        // Download functionality
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            downloadDocument();
+        });
+
+        function downloadDocument() {
+            const editorContent = document.getElementById('editorContent');
+            const content = editorContent.innerHTML;
+
+            // Remove error markings
+            const cleanContent = content.replace(/<span[^>]*class="(error-word|suggestion-word)"[^>]*>([^<]*)<\/span>/g, '$2');
+
+            // Create HTML document
+            const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>${documentTitle}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            line-height: 1.8;
+        }
+        h2 {
+            font-size: 20px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        p {
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+    </style>
+</head>
+<body>
+    ${cleanContent}
+</body>
+</html>`;
+
+            // Create blob and download
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${documentTitle.replace(/[^a-z0-9]/gi, '_')}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Preview button
+        document.getElementById('previewBtn').addEventListener('click', function() {
+            const content = document.getElementById('editorContent').innerHTML;
+            const cleanContent = content.replace(/<span[^>]*class="(error-word|suggestion-word)"[^>]*>([^<]*)<\/span>/g, '$2');
+
+            const preview = window.open('', 'Preview', 'width=800,height=600');
+            preview.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>${documentTitle}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; line-height: 1.8; }
+                        h2 { margin-top: 30px; font-size: 20px; margin-bottom: 15px; }
+                        p { margin-bottom: 20px; text-align: justify; }
+                    </style>
+                </head>
+                <body>${cleanContent}</body>
+                </html>
+            `);
+            preview.document.close();
+        });
+    </script>
+</body>
+</html>
