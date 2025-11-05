@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document Corrector</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+</head>
+
+<body>
+  <div class="main-container">
+    <div class="card">
+      <!-- Left Section -->
+      <div class="left-section">
+        <div class="logo-title">
+          <img src="images/logo.png" alt="Logo" class="logo" />
+          <h2>Document Corrector</h2>
+        </div>
+      </div>
+
+      <!-- Right Section -->
+      <div class="right-section">
+        <label for="upload-box" class="label">Upload Documents</label>
+
+        <div class="upload-box" id="uploadBox">
+          <i class="fa-solid fa-file"></i>
+          <p>Drag and drop</p>
+           <span class="file-types">Supports: .txt, .pdf, .doc, .docx</span>
+  <input type="file" id="fileInput" hidden accept=".txt,.pdf,.doc,.docx" />
+
+        </div>
+
+        <button id="runCheck">Run AI Check</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script src="script.js"></script>
+</body>
+</html>

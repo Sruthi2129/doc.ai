@@ -1,0 +1,133 @@
+/* Background setup */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Poppins", sans-serif;
+  background: url('images/back.png') no-repeat center center fixed;
+  background-size: cover;
+  color: #fff;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Main centered card */
+.card {
+  background: linear-gradient(135deg, #001f3f, #003366,#00ff99 130%,#001a33);;
+  color: #222;
+  border-radius: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+  width: 700px;
+  min-height: 250px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+  margin-left: 140px;
+}
+
+.left-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.logo {
+  width: 60px;
+  height: 60px;
+  margin-up: 100px;
+}
+
+h2 {
+  font-size: 2.3rem;
+  color: #ffffff;
+  margin-bottom: 140px;
+  font-weight: 650;
+  line-height: 1.1;
+}
+
+/* Right upload area */
+.right-section {
+  flex: 1.2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.label {
+  color: #fff;
+  font-weight: 520;
+  margin-bottom: 7px;
+  margin-right:270px;
+}
+.upload-box {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  width: 400px;
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: 0.3s ease;
+  margin-right:10px;
+}
+
+.upload-box:hover {
+  border-color: #6a11cb;
+}
+
+.upload-label {
+  position: absolute;
+  top: 10px;
+  left: 15px;
+  font-size: 30px;
+  font-weight: 600;
+  color: #333;
+  pointer-events: none;
+}
+
+.upload-box i {
+  margin-top: 30px; /* push icon lower */
+  color: #6a11cb;
+}
+
+.upload-box p {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #ffffff;
+}
+
+/* Button */
+button {
+  margin-top: 25px;
+  width: 100%;
+  background-color: #5b2de1;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 23px;
+  transition: 0.3s;
+}
+
+button:hover {
+  background-color: #4520a8;
+}
+.file-types {
+  font-size: 13px;
+  color: #333;
+  margin-top: 6px;
+  opacity: 0.8;
+}
